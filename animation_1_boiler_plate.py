@@ -4,8 +4,8 @@ from pygame.locals import *
 import random
 
 # canvas variables
-width = 1920 # adjust for width of canvas
-height = 1080 # adjust for height of canvas
+width = 900 # adjust for width of canvas
+height = 900 # adjust for height of canvas
 
 # frame rate
 fps = 60
@@ -27,6 +27,8 @@ total_background_images = 5
 total_sprites = 35 # code the number of sprite images your sprite sheet has
 sprite_sheet_width = sprite_sheet.get_rect().width
 sprite_sheet_height = sprite_sheet.get_rect().height
+sprite_sheet_background_width = background_scene.get_rect().width
+sprite_sheet_background_height = background_scene.get_rect().height
 
 # adjust sprite size
 sprite_scale_factor = 5
@@ -37,6 +39,15 @@ sprite_sheet_width = sprite_sheet.get_rect().width
 sprite_sheet_height = sprite_sheet.get_rect().height
 sprite_width = sprite_sheet_width // total_sprites
 sprite_height = sprite_sheet_height
+
+background_scale_factor = 3
+sprite_sheet_background_width = sprite_sheet_background_width * background_scale_factor
+sprite_sheet_background_height = sprite_sheet_background_height * background_scale_factor
+background_scene = pygame.transform.scale(background_scene, (sprite_sheet_background_width, sprite_sheet_background_height))
+sprite_sheet_background_width = background_scene.get_rect().width
+sprite_sheet_background_height = background_scene.get_rect().height
+background_width = sprite_sheet_background_width // 5
+background_height = sprite_sheet_background_height
 
 # define initial x and y position of sprite
 sprite_x_pos = 0
@@ -53,8 +64,10 @@ for i in range(total_sprites):
 
 # load background scene sprite sheet into list
 background_list = []
-for in range(total_background_images):
-    rect = pygame.Rect(i * width)
+for i in range(total_background_images):
+    rect = pygame.Rect(i * background_width, 0, background_width, background_height)
+    image = background_scene.subsurface(rect)
+    background_list.append(image)
 
 # sprite picker function for animation
 sprite_index = 0
@@ -67,6 +80,18 @@ def spritePicker():
         else:
             sprite_index += 1
 
+# sprite picker for background
+background_index = 0
+def backgroundPicker():
+    global background_index
+    global counter
+    if counter % 20 == 0:
+        if background_index == total_background_images - 1:
+            background_index = 0
+        else:
+            background_index += 1
+
+
 # clock to set FPS
 clock = pygame.time.Clock()
 
@@ -76,8 +101,8 @@ running = True
 # main game loop
 while running:
     # paint the canvas with background color
-    background_color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
-    canvas.fill(background_color)
+    # background_color = (random.randint(0,255), random.randint(0,255), random.randint(0,255))
+    # canvas.fill(background_color)
 
     # poll for events
     for event in pygame.event.get():
@@ -99,6 +124,8 @@ while running:
     if keys[pygame.K_d]:
         sprite_x_pos += sprite_x_delta
 
+    canvas.blit(background_list[background_index], (0, 0))
+    backgroundPicker()
     canvas.blit(sprite_list[sprite_index], (sprite_x_pos, sprite_y_pos))
     spritePicker()
     pygame.display.update()
